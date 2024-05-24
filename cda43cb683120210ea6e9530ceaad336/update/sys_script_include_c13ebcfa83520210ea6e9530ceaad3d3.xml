@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_854636_bingmap_p.BingMapClientCallable</api_name>
+        <caller_access>1</caller_access>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>BingMapClientCallable</name>
+        <script><![CDATA[var BingMapClientCallable = Class.create();
+BingMapClientCallable.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+
+    type: 'BingMapClientCallable',
+
+	fetchAddressDetail: function () {
+		try {
+			var place = this.getParameter("sysparm_place");
+		
+				var requestOptions = {
+				method: "GET",
+				redirect: "follow"
+			};
+			
+
+			var RESOURCE_PATH = ''
+			var request = new sn_ws.RESTMessageV2();
+			request.setQueryParameter("query", place);
+			request.setQueryParameter("key", "AodivwNZJb5fHan9r3PbZBufLQwGWVIc2Ctabfg21PrfKGGUTL76dJDIYzwfWttU");
+			request.setQueryParameter("includeEntityTypes", "Address,Business");
+             
+			request.setEndpoint('http://dev.virtualearth.net/REST/v1/Autosuggest'+ RESOURCE_PATH);
+			request.setHttpMethod('GET');
+
+			var requestBody = ""
+			request.setRequestBody(JSON.stringify(requestBody));
+
+			request.setRequestHeader("Accept", "application/json");
+		
+			var response = request.execute();
+			var parsedObj = JSON.parse(response.getBody());
+			var results = parsedObj.resourceSets[0].resources[0].value;
+			return JSON.stringify(results);
+		}
+		catch (err) {
+				gs.info(err);
+		}
+	},
+
+	fetchGeagraphyDetail: function () {
+		try {
+			var addressLine = this.getParameter("sysparm_addressLine");
+		
+				var requestOptions = {
+				method: "GET",
+				redirect: "follow"
+			};
+	
+			var RESOURCE_PATH = ''
+			var request = new sn_ws.RESTMessageV2();
+			request.setQueryParameter("addressLine", addressLine);
+			request.setQueryParameter("key", "AodivwNZJb5fHan9r3PbZBufLQwGWVIc2Ctabfg21PrfKGGUTL76dJDIYzwfWttU");
+
+			request.setEndpoint('http://dev.virtualearth.net/REST/v1/Locations'+ RESOURCE_PATH);
+			request.setHttpMethod('GET');
+
+			var requestBody = ""
+			request.setRequestBody(JSON.stringify(requestBody));
+
+			request.setRequestHeader("Accept", "application/json");
+		
+			var response = request.execute();
+			var parsedObj = JSON.parse(response.getBody());
+			var results = parsedObj.resourceSets[0].resources[0].point.coordinates;
+			return JSON.stringify(results);
+		}
+		catch (err) {
+				gs.info(err);
+			
+		}
+	},
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2024-05-24 18:25:10</sys_created_on>
+        <sys_id>c13ebcfa83520210ea6e9530ceaad3d3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>BingMapClientCallable</sys_name>
+        <sys_package display_value="BingMap Portal" source="x_854636_bingmap_p">cda43cb683120210ea6e9530ceaad336</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="BingMap Portal">cda43cb683120210ea6e9530ceaad336</sys_scope>
+        <sys_update_name>sys_script_include_c13ebcfa83520210ea6e9530ceaad3d3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2024-05-24 18:25:10</sys_updated_on>
+    </sys_script_include>
+</record_update>

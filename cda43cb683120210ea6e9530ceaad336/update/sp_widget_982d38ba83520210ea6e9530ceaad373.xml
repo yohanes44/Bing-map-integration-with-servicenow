@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function ($window, $scope, $http) {
+  
+  /* widget controller */
+  var c = this;
+  
+  $scope.place = "";
+  $scope.address = "";
+  $scope.city = "";
+  $scope.zipcode = "";
+  $scope.state = "";
+  
+  $scope.latitude = "";
+  $scope.longitude = "";
+  
+  //$scope.buni = "";
+  
+//  $scope.waiting = false;
+  
+  $scope.addressSuggestions = [];
+  $scope.searching = true;
+  
+	/*
+  $scope.handleKeyPress = function(event) {
+    if (event.which === 13) {
+      alert("entered");
+      $scope.searchingActive();
+      // 13 is the key code for Enter key
+      // Call your function here
+    }
+  };
+  
+	*/
+	
+	
+  $scope.searchingActive = function(){
+		if($scope.searching == true){
+			$scope.searching = false
+		}
+	 };
+  
+  $scope.getResults = function (place) {
+		
+    if(place.length == 0){
+      return;
+    }
+    
+    var ga = new GlideAjax('BingMapClientCallable');
+    ga.addParam('sysparm_name', 'fetchAddressDetail');
+    ga.addParam('sysparm_place', place);
+    var parsedObj = [];
+    
+    ga.getXML(function (response) {
+			
+      var res = response.responseXML.documentElement.getAttribute("answer");
+      parsedObj = JSON.parse(res);
+		//alert(JSON.stringify(parsedObj));
+			
+      
+      $scope.addressSuggestions = parsedObj;
+      
+      if($scope.addressSuggestions.length > 1){
+        $scope.searching = true;
+      } 
+      if($scope.addressSuggestions.length == 0 && $scope.searching == false){
+        $scope.searching = false;
+      }
+			
+      return;	
+    });
+  };
+  
+  $scope.getCurrent = function (opt) {
+    $scope.searching = false;
+    
+    if(opt.__type == "Address"){
+      $scope.address = opt.address.formattedAddress;
+      $scope.city = opt.address.locality;
+      $scope.zipcode = opt.address.postalCode;
+      $scope.state = opt.address.adminDistrict;
+      $scope.place = "";
+      
+      $scope.latitude = "";
+      $scope.longitude = "";
+    }
+    
+    if(opt.__type == "LocalBusiness"){
+      
+      $scope.waiting = true;
+      
+      $scope.address = "";
+      $scope.city = "";
+      $scope.zipcode = "";
+      $scope.state = "";
+      $scope.place = "";
+      
+      $scope.latitude = "";
+      $scope.longitude = "";
+      
+      var ga = new GlideAjax('BingMapClientCallable');
+      ga.addParam('sysparm_name', 'fetchGeagraphyDetail');
+      ga.addParam('sysparm_addressLine', opt.address.formattedAddress);
+      
+      var parsedObj = [];
+      ga.getXML(function (response) {
+        var res = response.responseXML.documentElement.getAttribute("answer");
+        parsedObj = JSON.parse(res);
+        
+        $scope.address = opt.address.formattedAddress;
+        $scope.city = opt.address.locality;
+        $scope.zipcode = opt.address.postalCode;
+        $scope.state = opt.address.adminDistrict;
+        
+        $scope.latitude = parsedObj[0];
+        $scope.longitude = parsedObj[1];
+        
+        $scope.$apply();
+      });
+    }
+  };
+  
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>@import "compass/css3";
+
+$body-bg: #c1bdba;
+$form-bg: #2596be;
+$white: #ffffff;
+
+$main: #1ab188;
+$main-light: lighten($main,5%);
+$main-dark: darken($main,5%);
+
+$gray-light: #a0b3b0;
+$gray: #ddd;
+
+$thin: 300;
+$normal: 400;
+$bold: 600;
+$br: 4px;
+
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+html {
+	overflow-y: scroll; 
+}
+
+body {
+  background:$body-bg;
+  font-family: 'Titillium Web', sans-serif;
+}
+
+a {
+  text-decoration:none;
+  color:$main;
+  transition:.5s ease;
+  &amp;:hover {
+    color:$main-dark;
+  }
+}
+
+.form {
+  background:rgba($form-bg,.9);
+  padding: 40px;
+  max-width:900px;
+  margin:40px auto;
+  border-radius:$br;
+  box-shadow:0 4px 10px 4px rgba($form-bg,.3);
+}
+
+.tab-group {
+  list-style:none;
+  padding:0;
+  margin:0 0 40px 0;
+  &amp;:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  li a {
+    display:block;
+    text-decoration:none;
+    padding:15px;
+    background:rgba($gray-light,.25);
+    color:$gray-light;
+    font-size:20px;
+    float:left;
+    width:50%;
+    text-align:center;
+    cursor:pointer;
+    transition:.5s ease;
+    &amp;:hover {
+      background:$main-dark;
+      color:$white;
+    }
+  }
+  .active a {
+    background:$main;
+    color:$white;
+  }
+}
+
+/*
+.tab-content &gt; div:last-child {
+  display:none;
+}
+*/
+
+h1 {
+  text-align:center;
+  color:$white;
+  font-weight:$thin;
+  margin:0 0 40px;
+}
+
+label {
+  position:absolute;
+  transform:translateY(6px);
+  left:13px;
+  color:rgba($white,.5);
+  transition:all 0.25s ease;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+  font-size:22px;
+  .req {
+  	margin:2px;
+  	color:$main;
+  }
+}
+
+label.active {
+  transform:translateY(50px);
+  left:2px;
+  font-size:14px;
+  .req {
+    opacity:0;
+  }
+}
+
+label.highlight {
+	color:$white;
+}
+
+.searchable{
+  font-size:22px;
+  display:block;
+  width:100%;
+  height:100%;
+  padding:5px 10px;
+  background:none;
+  background-image:none;
+ color:$white;
+  border-radius:0;
+  transition:border-color .25s ease, box-shadow .25s ease;
+  &amp;:focus {
+		outline:0;
+		border-color:$main;
+  }
+}
+
+.searchableList{
+  font-size:14px;
+  display:block;
+  width:50%;
+  height:70%;
+  padding:5px 10px;
+  background:none;
+  background-image:none;
+  color:$white;
+  border-radius:0;
+  transition:border-color .25s ease, box-shadow .25s ease;
+  &amp;:focus {
+		outline:0;
+		border-color:$main;
+  }
+  margin-top: 10px
+}
+
+#submitBt{
+   margin-top: 15px;
+   color: #2596be;
+  font-size:20px;
+  font-weight: bold;
+  align_self: center;
+}
+
+input, textarea {
+  font-size:22px;
+  display:block;
+  width:100%;
+  height:100%;
+  padding:5px 10px;
+  background:none;
+  background-image:none;
+  border:1px solid $gray-light;
+  color:$white;
+  border-radius:0;
+  transition:border-color .25s ease, box-shadow .25s ease;
+  &amp;:focus {
+		outline:0;
+		border-color:$main;
+  }
+}
+
+textarea {
+  border:2px solid $gray-light;
+  resize: vertical;
+}
+
+.field-wrap {
+  position:relative;
+  margin-bottom:40px;
+}
+
+.top-row {
+  &amp;:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  &gt; div {
+    float:left;
+    width:48%;
+    margin-right:4%;
+    &amp;:last-child { 
+      margin:0;
+    }
+  }
+}
+
+.button {
+  border:0;
+  outline:none;
+  border-radius:0;
+  padding:15px 0;
+  font-color:"red";
+  font-size:2rem;
+  font-weight:$bold;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  background:$main;
+  color:$white;
+  transition:all.5s ease;
+  -webkit-appearance: none;
+  &amp;:hover, &amp;:focus {
+    background:$main-dark;
+  }
+}
+
+.button-block {
+  display:block;
+  width:100%;
+}
+
+.forgot {
+  margin-top:-20px;
+  text-align:right;
+}
+
+
+
+
+
+
+span{
+	color: white;
+}
+
+
+.processingContainer{
+	
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  
+  .processing{
+      
+      display: flex;
+      justify-content: center;
+      color: white;
+      border-radius: 50%;
+      width: 50%;
+    }
+
+}
+
+
+
+.searchContainer{
+    
+}
+
+.searchResult{
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 9px 8px -3px rgba(64,60,67,.24), 8px 0 8px -7px rgba(64,60,67,.24), -8px 0 8px -7px rgba(64,60,67,.24);
+    border: 0;
+    padding-bottom: 4px;
+}
+
+
+.singleSearchContainer{
+  padding: 7px;
+  &amp;:hover, &amp;:focus {
+    background: #dedcdc;
+    cursor: pointer;
+  }
+}
+
+
+
+
+
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>bingmap</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>bingmap</name>
+        <option_schema/>
+        <public>true</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2024-05-24 18:20:09</sys_created_on>
+        <sys_id>982d38ba83520210ea6e9530ceaad373</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name>bingmap</sys_name>
+        <sys_package display_value="BingMap Portal" source="x_854636_bingmap_p">cda43cb683120210ea6e9530ceaad336</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="BingMap Portal">cda43cb683120210ea6e9530ceaad336</sys_scope>
+        <sys_update_name>sp_widget_982d38ba83520210ea6e9530ceaad373</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2024-05-24 18:33:06</sys_updated_on>
+        <template><![CDATA[<div>
+    <div class="form">
+        <div class="tab-content">
+            <div id="signup">
+                <h1>BingMap Integration</h1>
+                <div class="top-row"></div>
+
+                <div class="field-wrap">
+                    <span>Address</span>
+                    <label></label>
+                </div>
+                <div class="field-wrap">
+                    <span>City</span>
+                    <label><span class="req"></span></label>
+                    <input type="email" required autocomplete="off" ng-model="city" />
+                </div>
+                <div class="field-wrap">
+                    <span>Zipcode</span>
+                    <label><span class="req"></span></label>
+                    <input type="text" required autocomplete="off" ng-model="zipcode" />
+                </div>
+                <div class="field-wrap">
+                    <span>State</span>
+                    <label><span class="req"></span></label>
+                    <input type="text" required autocomplete="off" ng-model="state" />
+                </div>
+
+                <div class="field-wrap">
+                    <span>Latitude</span>
+                    <label><span class="req"></span></label>
+                    <input type="text" required autocomplete="off" ng-model="latitude" />
+                </div>
+                <div class="field-wrap">
+                    <span>Longitude</span>
+                    <label><span class="req"></span></label>
+                    <input type="text" required autocomplete="off" ng-model="longitude" />
+                </div>
+
+                <div>
+                    <div class="searchable">
+                        Search address here
+                    </div>
+                  
+                  
+                  
+                    <input type="text"  ng-keypress="getResults(place)" ng-keydown="searchingActive()" ng-model="place" ng-change="getResults(place)" />
+                </div>
+
+                <div>
+                    <div class="searchableList">
+                        Address List
+                    </div>
+
+                    <div class="searchContainer">
+                        <div class="searchResult">
+                            <div ng-if="searching" class="singleSearchContainer" ng-repeat="rest in addressSuggestions">
+                                <div ng-click="getCurrent(rest)">
+                                    {{rest.address.locality}} - {{rest.address.formattedAddress}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="submitBt" ng-click="getResults(place)">Submit</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>
