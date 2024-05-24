@@ -56,7 +56,7 @@
 			
       var res = response.responseXML.documentElement.getAttribute("answer");
       parsedObj = JSON.parse(res);
-		//alert(JSON.stringify(parsedObj));
+		alert(JSON.stringify(parsedObj));
 			
       
       $scope.addressSuggestions = parsedObj;
@@ -451,14 +451,14 @@ span{
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2024-05-24 18:20:09</sys_created_on>
         <sys_id>982d38ba83520210ea6e9530ceaad373</sys_id>
-        <sys_mod_count>6</sys_mod_count>
+        <sys_mod_count>7</sys_mod_count>
         <sys_name>bingmap</sys_name>
         <sys_package display_value="BingMap Portal" source="x_854636_bingmap_p">cda43cb683120210ea6e9530ceaad336</sys_package>
         <sys_policy/>
         <sys_scope display_value="BingMap Portal">cda43cb683120210ea6e9530ceaad336</sys_scope>
         <sys_update_name>sp_widget_982d38ba83520210ea6e9530ceaad373</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2024-05-24 18:33:06</sys_updated_on>
+        <sys_updated_on>2024-05-24 18:38:42</sys_updated_on>
         <template><![CDATA[<div>
     <div class="form">
         <div class="tab-content">
